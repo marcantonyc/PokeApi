@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var pokemonViewModelFactory: PokemonViewModelFactory
-    lateinit var pokemonViewModel: PokemonViewModel
+    private lateinit var pokemonViewModel: PokemonViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
