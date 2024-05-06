@@ -7,8 +7,8 @@ data class Result(
     val url: String
 )
 
-fun Result.asExternalModel(id: Int) = PokemonItemList(
+fun Result.asExternalModel() = PokemonItemList(
     name = name,
     url = url,
-    id = id
+    id = url.substringAfter("pokemon/").substringBefore('/')
 )

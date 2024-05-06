@@ -29,7 +29,7 @@ class GetPokemonListUseCase @Inject constructor(
            val pokemonList = PokemonList(
                previous = response.previous?:EMPTY_STRING,
                next = response.next,
-               list = response.results.mapIndexed { index, result ->  result.asExternalModel(index+1)}
+               list = response.results.map { result ->  result.asExternalModel()}
            )
             emit(Resource.Success(pokemonList))
         } catch (e: HttpException){

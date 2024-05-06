@@ -1,11 +1,9 @@
 package com.example.pokeapi.ui.pokemon
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.pokeapi.common.Resource
-import com.example.pokeapi.domain.model.PokemonDetail
+import com.example.pokeapi.domain.model.PokemonItemList
 import com.example.pokeapi.domain.use_case.GetPokemonDetailUseCase
 import com.example.pokeapi.domain.use_case.GetPokemonListUseCase
 import com.example.pokeapi.ui.base.BaseViewModel
@@ -21,13 +19,11 @@ class PokemonViewModel @Inject constructor(
 
     private val limit = 30
 
-    val offset: LiveData<Int> get() = _offset
-    private var _offset = MutableLiveData(0)
-
-
-
     override fun createInitialState(): PokemonUiState {
-        return PokemonUiState(isListLoading = true)
+        return PokemonUiState(
+            isListLoading = true,
+            pokemonList = emptyList()
+            )
     }
 
     override fun handleIntent(intent: PokemonIntent) {
@@ -39,20 +35,31 @@ class PokemonViewModel @Inject constructor(
     }
 
 
-    fun getPokemonList(){
+
+    private fun getPokemonList(){
         viewModelScope.launch(Dispatchers.IO) {
             setState { copy(isListLoading = true) }
+            val offset = uiState.value.pokemonList.size.toString()
             getPokemonListUseCase(
                 limit = limit.toString(),
-                offset = offset.value.toString(),
+                offset = offset,
             ).collect{
                 when(it){
                     is Resource.Success -> {
+
+
                         setState {
+                            val mutableList : MutableList<PokemonItemList> = arrayListOf()
+                            mutableList.addAll(this.pokemonList)
+                            it.data?.list?.let { it->
+                                mutableList.addAll(it)
+                            }
+
                             copy(
                                 isListLoading = false,
-                                pokemonList = it.data?.list?: emptyList()
+                                pokemonList = mutableList
                             )
+
                         }
 
                     }
@@ -79,8 +86,7 @@ class PokemonViewModel @Inject constructor(
         }
     }
 
-    fun openPokemonDetail(name: String) {
-        Log.d("mki","show $name")
+    private fun openPokemonDetail(name: String) {
         viewModelScope.launch(Dispatchers.IO){
             setState { copy(
                 isShowDetailDialog = true,
@@ -121,7 +127,7 @@ class PokemonViewModel @Inject constructor(
         }
     }
 
-    fun closePokemonDetail(){
+    private fun closePokemonDetail(){
         setState {
             copy(
                 pokemonDetail = null,

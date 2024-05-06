@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.pokeapi.di.viewmodel.PokemonViewModelFactory
 import com.example.pokeapi.ui.pokemon.PokemonIntent
 import com.example.pokeapi.ui.pokemon.PokemonViewModel
-import com.example.pokeapi.ui.pokemon.components.LoadingComponent
 import com.example.pokeapi.ui.pokemon.components.PokemonDetailDialogComponent
 import com.example.pokeapi.ui.pokemon.components.PokemonListComponent
 import com.example.pokeapi.ui.theme.PokeApiTheme
@@ -36,25 +35,21 @@ class MainActivity : ComponentActivity() {
         (application as PokeApiApplication).applicationComponent.inject(this)
 
         pokemonViewModel = ViewModelProvider(this, pokemonViewModelFactory)[PokemonViewModel::class.java]
+
         enableEdgeToEdge()
         setContent {
             PokeApiTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     val uiState = pokemonViewModel.uiState.collectAsState().value
                     val onIntent = pokemonViewModel::setIntent
-
-
+                    if(uiState.isListLoading){
+                        onIntent(PokemonIntent.GetPokemonList)
+                    }
                     Column(
                         Modifier
                             .padding(innerPadding)
                             .background(PokedexBg)) {
-                        if(uiState.isListLoading){
-                            LoadingComponent()
-                            onIntent(PokemonIntent.GetPokemonList)
-                        }
-                        else{
-                            PokemonListComponent(pokemonList = uiState.pokemonList, pokemonViewModel::setIntent )
-                        }
+                        PokemonListComponent(pokemonList = uiState.pokemonList, pokemonViewModel::setIntent )
                     }
 
                     if (uiState.isShowDetailDialog){
